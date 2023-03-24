@@ -1,6 +1,10 @@
 /// <reference types="cypress" />
 
-describe('login', ()=> {
+import loginPage from '../support/pages/login'
+
+import shaversPage from '../support/pages/shavers'
+
+describe('login', () => {
 
     context('quando submeto o formulário', () => {
 
@@ -11,68 +15,128 @@ describe('login', ()=> {
                 email: 'gerlan@test.com',
                 password: 'gerlan@123'
             }
-    
-            cy.visit('http://localhost:3000')
 
-            cy.get('input[placeholder$="email"]').type(user.email)
+            loginPage.submit(user.email, user.password)
 
-            cy.get('input[placeholder*="senha"]').type(user.password) //o *= é um contains que procura por td que tiver esse texto. O $= é quando termina com, e o ^= é quando começa com.
-
-            cy.contains('button', 'Entrar').click()
-
-            cy.get('.logged-user div a')
-            .should('be.visible') //validando se o usuário realmente logou com sucesso e entrou na pagina inicial
-            .should('have.text', 'Olá, ' + user.name) //validando o texto do usuario que logou
+            shaversPage.header.userShouldBeLoggedIn(user.name)
         })
 
-        it('não deve logar com senha incorreta', () =>{
+        it('não deve logar com senha incorreta', () => {
 
             const user = {
                 name: 'Gerlan',
                 email: 'gerlan@test.com',
                 password: 'gerlan'
             }
-            
+
             const message = 'Ocorreu um erro ao fazer login, verifique suas credenciais.'
-            cy.visit('http://localhost:3000')
 
-            cy.get('input[placeholder$="email"]').type(user.email)
+            loginPage.submit(user.email, user.password)
 
-            cy.get('input[placeholder*="senha"]').type(user.password) 
-
-            cy.contains('button', 'Entrar').click()
-
-            cy.get('.notice-container') //box principal que contém a mensagem de error dentro. Verificamos se ele está visivel, para depois validar a mensagem.
-            .should('be.visible')
-            .find('.error p') //procurando pelo filho da classe inicial .notice-container e depois a mensagem.
-            .should('have.text', message)
+            loginPage.noticeShouldBe(message)
 
         })
 
-        it('não deve logar com email não cadastrado', ()=> {
+        it('não deve logar com email não cadastrado', () => {
 
             const user = {
                 name: 'Gerlan',
                 email: 'gerlan@404.com',
                 password: 'gerlan'
             }
-            
+
             const message = 'Ocorreu um erro ao fazer login, verifique suas credenciais.'
-            cy.visit('http://localhost:3000')
 
-            cy.get('input[placeholder$="email"]').type(user.email)
+            loginPage.submit(user.email, user.password)
 
-            cy.get('input[placeholder*="senha"]').type(user.password) 
-
-            cy.contains('button', 'Entrar').click()
-
-            cy.get('.notice-container')
-            .should('be.visible')
-            .find('.error p')
-            .should('have.text', message)
-
+            loginPage.noticeShouldBe(message)
 
         })
 
+        it('campos obrigatórios', () => {
+
+            loginPage.submit()
+
+            loginPage.requiredFields('E-mail é obrigatório', 'Senha é obrigatória')
+        })
+
     })
+
+    context('senha muito curta', () => {
+
+        const passwords = [
+            '1',
+            '12',
+            '123',
+            '1234',
+            '12345'
+        ]
+
+        passwords.forEach((senha) => {
+            it(`não deve logar com a senha: ${senha}`, () => {
+
+                loginPage.submit('galeguin@teste.com.br', senha)
+
+                loginPage.alertShouldBe('Pelo menos 6 caracteres')
+
+            })
+        })
+    })
+
+    context('email no formato incoreto', () => {
+
+        const emails = [
+            'galego&gmail.com',
+            'galego.com.br',
+            '@gmail.com',
+            'papito@',
+            '@',
+            '12341312',
+            '@#$%*()!+-{}][?^',
+            'xpto1213413'
+        ]
+
+        emails.forEach((email) => {
+            it(`não deve logar com o e-mail: ${email}`, () => {
+
+                loginPage.submit(email, '123456789')
+
+                loginPage.alertShouldBe('Informe um email válido')
+
+            })
+        })
+    })
+    /*
+        //validação de maneira separadamente cada campo da tela de login.
+    
+        context('campos obrigatórios', () => {
+            
+            beforeEach(() => {
+                loginPage.submit()
+            })
+    
+            it('deve validar email', () => {
+    
+                cy.get('.alert-error')
+                    .should('have.length', 2) 
+                    .and(($alertError) => { 
+                        
+                        expect($alertError.get(0).textContent).to.equal('E-mail deve ser obrigatório')
+                    })
+            })
+    
+            it('deve validar senha', () => {
+    
+                cy.get('.alert-error')
+                    .should('have.length', 2) 
+                    .and(($alertError) => { 
+                        
+                        expect($alertError.get(1).textContent).to.equal('Senha é obrigatória')
+                    })
+            })
+    
+    
+        })
+    
+        */
 })
