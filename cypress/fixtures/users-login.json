@@ -1,5 +1,32 @@
 {
-    "name": "Gerlan",
-    "email": "gerlan@test.com",
-    "password": "gerlan@123"
+    "success": {
+        "name": "Gerlan",
+        "email": "gerlan@test.com",
+        "password": "gerlan@123"
+    },
+    "invpass": {
+        "email": "gerlan@test.com",
+        "password": "abc123"
+    },
+    "email404": {
+        "email": "gerlan@404.com",
+        "password": "abc123"
+    },
+    "shortpass": [
+        "1",
+        "12",
+        "123",
+        "1234",
+        "12345"
+    ],
+    "invemails": [
+        "galego&gmail.com",
+        "galego.com.br",
+        "@gmail.com",
+        "papito@",
+        "@",
+        "12341312",
+        "@#$%*()!+-{}][?^",
+        "xpto1213413"
+    ]
 }
