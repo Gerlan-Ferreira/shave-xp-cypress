@@ -4,15 +4,21 @@ import loginPage from '../support/pages/login'
 
 import shaversPage from '../support/pages/shavers'
 
-import data from '../fixtures/users-login.json'
+//import data from '../fixtures/users-login.json'
 
 describe('login', () => {
 
+    beforeEach(()=>{
+        cy.fixture('users-login').then(function(data){
+            this.data = data
+        })
+    })
+
     context('quando submeto o formulário', () => {
 
-        it.only('deve logar com sucesso', () => {
+        it.only('deve logar com sucesso', function (){
 
-            const user = data
+            const user = this.data
 
             loginPage.submit(user.email, user.password)
 
