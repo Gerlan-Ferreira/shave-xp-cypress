@@ -4,17 +4,28 @@ import loginPage from '../support/pages/login'
 
 import shaversPage from '../support/pages/shavers'
 
+import data from '../fixtures/users-login.json'
+
 describe('login', () => {
 
     context('quando submeto o formulário', () => {
 
-        it('deve logar com sucesso', () => {
+        it.only('deve logar com sucesso', () => {
 
-            const user = {
-                name: 'Gerlan',
-                email: 'gerlan@test.com',
-                password: 'gerlan@123'
-            }
+            const user = data.success
+
+            cy.task('removeUser', user.email)
+                .then(function (result) {
+                    cy.log(result)
+                })
+
+            cy.request({
+                method: 'POST',
+                url: 'http://localhost:3333/users',
+                body: user
+            }).then(function (response) {
+                expect(response.status).to.eq(201)
+            })
 
             loginPage.submit(user.email, user.password)
 
@@ -23,11 +34,7 @@ describe('login', () => {
 
         it('não deve logar com senha incorreta', () => {
 
-            const user = {
-                name: 'Gerlan',
-                email: 'gerlan@test.com',
-                password: 'gerlan'
-            }
+            const user = data.invpass
 
             const message = 'Ocorreu um erro ao fazer login, verifique suas credenciais.'
 
@@ -39,11 +46,7 @@ describe('login', () => {
 
         it('não deve logar com email não cadastrado', () => {
 
-            const user = {
-                name: 'Gerlan',
-                email: 'gerlan@404.com',
-                password: 'gerlan'
-            }
+            const user = data.email404
 
             const message = 'Ocorreu um erro ao fazer login, verifique suas credenciais.'
 
@@ -64,15 +67,7 @@ describe('login', () => {
 
     context('senha muito curta', () => {
 
-        const passwords = [
-            '1',
-            '12',
-            '123',
-            '1234',
-            '12345'
-        ]
-
-        passwords.forEach((senha) => {
+        data.shortpass.forEach((senha) => {
             it(`não deve logar com a senha: ${senha}`, () => {
 
                 loginPage.submit('galeguin@teste.com.br', senha)
@@ -85,18 +80,7 @@ describe('login', () => {
 
     context('email no formato incoreto', () => {
 
-        const emails = [
-            'galego&gmail.com',
-            'galego.com.br',
-            '@gmail.com',
-            'papito@',
-            '@',
-            '12341312',
-            '@#$%*()!+-{}][?^',
-            'xpto1213413'
-        ]
-
-        emails.forEach((email) => {
+        data.invemails.forEach((email) => {
             it(`não deve logar com o e-mail: ${email}`, () => {
 
                 loginPage.submit(email, '123456789')
