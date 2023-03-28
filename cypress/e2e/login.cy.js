@@ -8,17 +8,15 @@ describe('login', () => {
 
     context('quando submeto o formulário', () => {
 
-        it('deve logar com sucesso', () => {
+        it.only('deve logar com sucesso', () => {
 
-            const user = {
-                name: 'Gerlan',
-                email: 'gerlan@test.com',
-                password: 'gerlan@123'
-            }
+          cy.fixture('users-login').then(function(data){
 
-            loginPage.submit(user.email, user.password)
+            loginPage.submit(data.email, data.password)
 
-            shaversPage.header.userShouldBeLoggedIn(user.name)
+            shaversPage.header.userShouldBeLoggedIn(data.name)
+
+          })
         })
 
         it('não deve logar com senha incorreta', () => {
