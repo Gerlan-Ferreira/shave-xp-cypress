@@ -5,29 +5,30 @@ import loginPage from '../support/pages/login'
 import shaversPage from '../support/pages/shavers'
 
 import data from '../fixtures/users-login.json'
-import { use } from 'chai'
 
 describe('login', () => {
 
     context('quando submeto o formulário', () => {
 
-        it('deve logar com sucesso', () => {
+        it.only('deve logar com sucesso', () => {
 
-            // dado que eu tenho um NOVO usuário
             const user = data.success
+
+            cy.task('removeUser', user.email)
+                .then(function (result) {
+                    cy.log(result)
+                })
 
             cy.request({
                 method: 'POST',
                 url: 'http://localhost:3333/users',
                 body: user
-            }).then(function(response){
+            }).then(function (response) {
                 expect(response.status).to.eq(201)
             })
 
-            // quando submeto o form de login com esse usuário
             loginPage.submit(user.email, user.password)
 
-            // então devo ser logado com sucesso
             shaversPage.header.userShouldBeLoggedIn(user.name)
         })
 
