@@ -33,11 +33,22 @@ app.post('/user', async function (req, res) {
         is_shaver: is_shaver
     }
 
+    if (!user.name || !user.email || !user.password && (user.is_shaver || !user.is_shaver)) {
+        return res.status(400).json({ message: 'Every field is mandatory.' })
+    }
     console.log(user)
 
-    const id = await insertUser(user)
+    try {
+        await deleteUser(user.email) //passando para deletar o usuário já nessa rota com isso não preciso chamar novamente na hora de rodar o teste
+        const id = await insertUser(user)
 
-    res.status(201).json({ user_id: id })
+        res.status(201).json({ user_id: id })
+
+    } catch (error) {
+        res.status(500).json({error: 'Ocorreu um erro ao criar o usuário!!!', message: error.detail}) 
+        //irá retorna status 500 quando acontecer algum error e exbirá no body o retorno do banco de dados também.
+    }
+
 
 })
 
